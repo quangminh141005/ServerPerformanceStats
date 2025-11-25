@@ -40,5 +40,20 @@ cpu_usage() {
             printf "%.2f\n", 100-idle
         }')
 
-        echo "Total CPU usage: "${cpu_used}"
+        echo "Total CPU usage: ${cpu_used}%"
+    else
+        # if top doesn't exist 
+        echo "top command not found; using value from /proc/stat (approximate)."
+        read -r cpu user nice system idle iowait irq softirq steal guest guest_nice < /proc/stat # read from /proc/stat
+        total1=$((user+nice+system+idle+iowait+irq+softirq+steal))
+        idle1=$idle
+        sleep 1 # wait for the second value to see the changes
+        read -r cpu user nice system idle iowait irq softirq steal guest guest_nice < /proc/stat
+        total2=$((user+nice+system+idle+iowait+irq+softirq+steal))
+        idle2=$idle
+        total_diff=$((total2-total1))
+        idle_diff=$((idle2-idle1))
+        cpu_used=$(awk -v t="$total_diff" -v i="$idle_diff" 'BEGIN { if(t==0) {print 0} else {print "%.2f", (t-i)/t*100} }') # -v to receive bash variable
+        echo "Total CPU usage: ${cpu_used}%"
+    fi
 }
