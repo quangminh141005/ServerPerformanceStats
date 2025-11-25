@@ -12,9 +12,10 @@ hr() {
 }
 
 title() {
+    echo 
     hr
     echo ">>> $1"
-    hr
+    hr 
 }
 
 cpu_usage() {
@@ -58,7 +59,7 @@ cpu_usage() {
     fi
 }
 
-# memory usage
+# Memory usage
 memory_usage() {
     title "MEMORY USAGE"
 
@@ -76,7 +77,47 @@ memory_usage() {
     fi
 }
 
+# Disk usage
+disk_usage() {
+    title "DISK USAGE (All mounted filesystems)"
+
+    if command -v df >/dev/null 2>&1; then
+        # Over all total line
+        total_line=$(df -h --total 2>/dev/null | awk 'END{print}') # take the last line
+        if [ -n "$total_line" ]; then # -n(not empty)
+            read -r fs size used avail usepct mount <<< "$total_line"
+            echo "Total disk size: $size"
+            echo "Used:            $used ($usepct)"
+            echo "Available        $avail"
+        else 
+            echo "Could not get --install; showing per file system"
+        fi
+    fi
+}
+
+# Top process
+top_process() {
+    title "TOP 5 PROCESS BY CPU"
+
+    if command -v ps >/dev/null 2>&1; then
+        # Header + 5 line
+        ps -eo pid,comm,%cpu,%mem --sort=%cpu | head -n 6 # show only 6 line of the output
+    else 
+        echo "ps command not found"
+    fi
+    
+    title "TOP 5 PROCESS BY MEM"
+
+    if command -v ps >/dev/null 2>&1; then 
+        ps -eo pid,comm,%mem,%cpu --sort=%mem | head -n 6
+    else 
+        echo "ps command not found"
+    fi
+}
+
 
 # main 
 cpu_usage
 memory_usage
+disk_usage
+top_process
