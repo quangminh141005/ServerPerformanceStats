@@ -101,7 +101,7 @@ top_process() {
 
     if command -v ps >/dev/null 2>&1; then
         # Header + 5 line
-        ps -eo pid,comm,%cpu,%mem --sort=%cpu | head -n 6 # show only 6 line of the output
+        ps -eo pid,comm,%cpu,%mem --sort=-%cpu | head -n 6 # show only 6 line of the output
     else 
         echo "ps command not found"
     fi
@@ -109,7 +109,7 @@ top_process() {
     title "TOP 5 PROCESS BY MEM"
 
     if command -v ps >/dev/null 2>&1; then 
-        ps -eo pid,comm,%mem,%cpu --sort=%mem | head -n 6
+        ps -eo pid,comm,%mem,%cpu --sort=-%mem | head -n 6
     else 
         echo "ps command not found"
     fi
