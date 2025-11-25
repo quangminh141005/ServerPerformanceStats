@@ -4,11 +4,11 @@
 
 set -o errexit # stop if command fail 
 set -o nounset # stop if i use a unset varivable
-set -o pipefall # fail if part of a pipeline fail
+set -o pipefail # fail if part of a pipeline fail
 
 # seperator line
 hr() {
-    printf '\n==============================================================\n\n'
+    printf '==============================================================\n'
 }
 
 title() {
@@ -18,7 +18,7 @@ title() {
 }
 
 cpu_usage() {
-    title "cpu usage"
+    title "CPU USAGE"
 
     if command -v top >/dev/null 2>&1; then
         cpu_line=$(LC_ALL=C top -bn1 | grep -m1 "Cpu(s)") # LC_ALL=C: output always English, b(non interative), n1(one iteration), m1(stop after the first match)
@@ -57,3 +57,26 @@ cpu_usage() {
         echo "Total CPU usage: ${cpu_used}%"
     fi
 }
+
+# memory usage
+memory_usage() {
+    title "MEMORY USAGE"
+
+    if command  -v free >/dev/null 2>&1; then
+    # Use mem row(second row) from `free -m`
+    read -r _ total used free shared buff_cache available <<< "$(free -m | awk 'NR==2 {print $1, $2, $3, $4, $5, $6, $7}')"
+    used_pct=$(awk -v t="$total" -v u="$used" 'BEGIN { if(t==0){print 0} else {printf "%.2f", u/t*100} }')
+    free_pct=$(awk -v t="$total" -v f="$free" 'BEGIN { if(t==0){print 0} else {printf "%.2f", f/t*100} }')
+
+    echo "Total memory:   ${total} MB"
+    echo "Used:           ${used} MB (${used_pct}%)"
+    echo "Free:           ${free} MB (${free_pct}%)"
+    echo "Available:      ${available} MB"
+    echo "Budffers/Cache: ${buff_cache} MB"
+    fi
+}
+
+
+# main 
+cpu_usage
+memory_usage
