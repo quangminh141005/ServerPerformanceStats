@@ -115,9 +115,26 @@ top_process() {
     fi
 }
 
+# more stats (why not)
+extra_stats() {
+    title "SYSTEM INFORMATION"
+
+    echo "Hostname:         $(hostname 2>/dev/null || echo N/A)"
+    echo "Kernel:           $(uname -sr 2>/dev/null || echo N/A)"
+
+    if [ -r /etc/os-release ]; then # check if the file is readable
+        . /etc/os-release
+        echo "OS:               ${PRETTY_NAME:-$NAME}"
+    elif command -v lsb_release >/dev/null 2>&1; then
+        echo "OS:             $(lsb_release -ds)"
+    else
+        echo "OS:             Unknown (no /etc/os-release, no lsb_release)"
+    fi
+}
 
 # main 
 cpu_usage
 memory_usage
 disk_usage
 top_process
+extra_stats
